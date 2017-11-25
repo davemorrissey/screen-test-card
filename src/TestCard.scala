@@ -25,6 +25,7 @@ object TestCard extends App {
   val cY = imH/2
   val paletteW = (imW * 0.35).toInt
   val paletteColW = paletteW/palette.length
+  val centerW = imW - (2 * paletteW)
 
   val canvas = new BufferedImage(imW, imH, BufferedImage.TYPE_INT_RGB)
   val g = canvas.createGraphics()
@@ -274,7 +275,8 @@ object TestCard extends App {
 
   /**
     * Draw concentric circles starting from the center, with stroke thickness increasing until
-    * the radius is 10% of the image width, then decreasing thickness after.
+    * the radius is 10% of the image width, then decreasing thickness after. Then overdraw two
+    * quadrants of the circle with radial lines.
     */
   def drawCentralCircles() {
     var stroke = 0.5f
@@ -292,6 +294,35 @@ object TestCard extends App {
         stroke *= multiplier
       }
     }
+
+    // Black out the top right and bottom left
+    g.setColor(Color.BLACK)
+    g.fillRect(cX, 0, cX, cY)
+    g.fillRect(0, cY, cX, cY)
+
+    // Draw outer radial lines with 1 degree intervals
+    g.setColor(Color.WHITE)
+    for (i <- 180 to 268 by 2) {
+      g.fillArc(cX - radius.toInt, cY - radius.toInt, radius.toInt * 2, radius.toInt * 2, i, 1)
+    }
+    for (i <- 0 to 88 by 2) {
+      g.fillArc(cX - radius.toInt, cY - radius.toInt, radius.toInt * 2, radius.toInt * 2, i, 1)
+    }
+
+    // Overlay the central part of the two radial segments
+    g.setColor(Color.BLACK)
+    g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, 180, 90)
+    g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, 0, 90)
+
+    // Draw inner radial lines with 2 degree intervals
+    g.setColor(Color.WHITE)
+    for (i <- 180 to 268 by 4) {
+      g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, i, 2)
+    }
+    for (i <- 0 to 88 by 4) {
+      g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, i, 2)
+    }
+
   }
 
   def dLine(x1: Double, y1: Double, x2: Double, y2: Double) {
