@@ -41,6 +41,7 @@ object TestCard extends App {
   drawCentralCircles()
   drawMaterialPalette()
   drawMaterialPaletteGraphics()
+  drawBlackWhiteGradients()
 
   g.dispose()
 
@@ -323,6 +324,22 @@ object TestCard extends App {
       g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, i, 2)
     }
 
+  }
+
+  /**
+    * Black to white gradients at top and bottom.
+    */
+  def drawBlackWhiteGradients() {
+    val rowOffset = (imH * 0.1).toInt
+    val rowH = (imH - (2 * rowOffset)) / 19
+    val paint = g.getPaint
+    g.setPaint(new GradientPaint(cX - (centerW/2), rowOffset, Color.BLACK, cX + (centerW/2), rowOffset, Color.WHITE))
+    g.fillRect(cX - (centerW/2), rowOffset, centerW, rowH)
+    g.fillRect(cX - (centerW/2), imH - rowOffset - rowH, centerW, rowH)
+    g.setPaint(new GradientPaint(cX - (centerW/2), rowOffset, Color.WHITE, cX + (centerW/2), rowOffset, Color.BLACK))
+    g.fillRect(cX - (centerW/2), rowOffset + (rowH/2), centerW, rowH - (rowH/2))
+    g.fillRect(cX - (centerW/2), imH - rowOffset - (rowH/2), centerW, rowH - (rowH/2))
+    g.setPaint(paint)
   }
 
   def dLine(x1: Double, y1: Double, x2: Double, y2: Double) {
