@@ -76,10 +76,10 @@ object TestCard extends App {
           val paint = g.getPaint
           // Top left
           g.setPaint(new GradientPaint(colOffset, rowOffset, Color.decode(shade), colOffset, rowOffset + rowH, Color.decode(color(si + 1))))
-          g.fillRect(colOffset + (paletteColW / 2), rowOffset, paletteColW / 2, rowH)
+          g.fillRect(colOffset, rowOffset, paletteColW, rowH)
           // Bottom right
           g.setPaint(new GradientPaint(imW - colOffset, imH - rowOffset, Color.decode(shade), imW - colOffset, imH - rowOffset - rowH, Color.decode(color(si + 1))))
-          g.fillRect(imW - colOffset - paletteColW, imH - rowOffset - rowH, paletteColW / 2, rowH)
+          g.fillRect(imW - colOffset - paletteColW, imH - rowOffset - rowH, paletteColW, rowH)
 
           g.setPaint(paint)
         }
