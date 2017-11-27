@@ -19,13 +19,12 @@ object TestCard extends App {
     Array("#F3E5F5", "#E1BEE7", "#CE93D8", "#BA68C8", "#AB47BC", "#9C27B0", "#8E24AA", "#7B1FA2", "#6A1B9A", "#4A148C").reverse
   )
 
-  val imW = 600
-  val imH = 450
+  val imW = 600 // Preferably divisible by 30
+  val imH = 480 // About 0.75-0.8 of height
   val cX = imW/2
   val cY = imH/2
-  val paletteW = (imW * 0.35).toInt
-  val paletteColW = paletteW/palette.length
-  val centerW = imW - (2 * paletteW)
+  val grid = imW/30
+  val gridOffset = (imH - (19 * grid))/2
 
   val canvas = new BufferedImage(imW, imH, BufferedImage.TYPE_INT_RGB)
   val g = canvas.createGraphics()
@@ -53,39 +52,36 @@ object TestCard extends App {
   def drawMaterialPalette() {
 
     // For each color in the palette...
-    var colOffset = 0
-    for (color <- palette) {
+    for ((color, ci) <- palette.zipWithIndex) {
 
       // At left and right, fill the whole column with a middle shade of the color
       g.setColor(Color.decode(color(4)))
-      g.fillRect(colOffset, 0, paletteColW, imH) // Left
-      g.fillRect(imW - colOffset - paletteColW, 0, paletteColW, imH) // Right
+      g.fillRect(ci * grid, 0, grid, imH) // Left
+      g.fillRect(imW - (ci * grid) - grid, 0, grid, imH) // Right
 
       // For each shade of the color...
-      var rowOffset = (imH * 0.1).toInt
-      val rowH = (imH - (2 * rowOffset)) / 19
       for ((shade, si) <- color.zipWithIndex) {
+        val rowY = gridOffset + (si * grid)
+        val colX = ci * grid
 
         // Draw a tall block of the shade. Later shades overlay the middle.
         g.setColor(Color.decode(shade))
-        g.fillRect(colOffset, rowOffset, paletteColW, imH - (2 * rowOffset)) // Left
-        g.fillRect(imW - colOffset - paletteColW, rowOffset, paletteColW, imH - (2 * rowOffset)) // Right
+        g.fillRect(colX, rowY, grid, imH - (2 * rowY)) // Left
+        g.fillRect(imW - colX - grid, rowY, grid, imH - (2 * rowY)) // Right
 
         // For top left and bottom right, turn half the shade square into a gradient between this color and the next
         if (si < color.length - 1) {
           val paint = g.getPaint
           // Top left
-          g.setPaint(new GradientPaint(colOffset, rowOffset, Color.decode(shade), colOffset, rowOffset + rowH, Color.decode(color(si + 1))))
-          g.fillRect(colOffset, rowOffset, paletteColW, rowH)
+          g.setPaint(new GradientPaint(colX, rowY, Color.decode(shade), colX, rowY + grid, Color.decode(color(si + 1))))
+          g.fillRect(colX, rowY, grid, grid)
           // Bottom right
-          g.setPaint(new GradientPaint(imW - colOffset, imH - rowOffset, Color.decode(shade), imW - colOffset, imH - rowOffset - rowH, Color.decode(color(si + 1))))
-          g.fillRect(imW - colOffset - paletteColW, imH - rowOffset - rowH, paletteColW, rowH)
+          g.setPaint(new GradientPaint(imW - colX, imH - rowY, Color.decode(shade), imW - colX, imH - rowY - grid, Color.decode(color(si + 1))))
+          g.fillRect(imW - colX - grid, imH - rowY - grid, grid, grid)
 
           g.setPaint(paint)
         }
-        rowOffset += rowH
       }
-      colOffset += paletteColW
     }
   }
 
@@ -94,38 +90,38 @@ object TestCard extends App {
     */
   def drawMaterialPaletteGraphics() {
 
-    var colOffset = 0
     for ((color, ci) <- palette.zipWithIndex) {
 
-      var rowOffset = (imH * 0.1).toInt
-      var rowH = (imH - (2 * rowOffset)) / 19
-      val rad = (Math.min(paletteColW, rowH) * 0.3).toInt
-      val defaultStroke = Math.max(1, rowH * (0.05f * (ci+1)/palette.length))
+      val rad = (grid * 0.3).toInt
+      val defaultStroke = Math.max(1, grid * (0.05f * (ci+1)/palette.length))
       for ((shade, si) <- color.zipWithIndex) {
         g.setColor(Color.WHITE)
 
-        val leftCX = colOffset + (paletteColW/2d)
-        val rightCX = imW - colOffset - (paletteColW/2)
-        val topCY = rowOffset + (rowH/2d)
-        val bottomCY = imH - rowOffset - (rowH/2)
+        val rowY = gridOffset + (si * grid)
+        val colX = ci * grid
+
+        val leftCX = colX + (grid/2d)
+        val rightCX = imW - colX - (grid/2)
+        val topCY = rowY + (grid/2d)
+        val bottomCY = imH - rowY - (grid/2)
 
         if (si > 0) {
           if (ci < palette.length - 1 && si < palette.length - 1 && ci == si) {
 
             // Diagonals
             drawCircles(leftCX, topCY, rad, defaultStroke)
-            drawPlusses(leftCX, bottomCY, rowH, rad, defaultStroke)
-            drawCrosses(rightCX, topCY, rowH, rad, defaultStroke)
+            drawPlusses(leftCX, bottomCY, rad, defaultStroke)
+            drawCrosses(rightCX, topCY, rad, defaultStroke)
             drawSquares(rightCX, bottomCY, rad, defaultStroke)
 
           } else if (ci == palette.length - 1 && si < palette.length - 1) {
 
             // Decreasing size shapes in last (middle) color column
-            val r = Math.min(paletteColW, rowH) * 0.3 * ((si + 2f)/color.length)
-            val s = rowH * (0.05f * si/color.length)
+            val r = grid * 0.3 * ((si + 2f)/color.length)
+            val s = grid * (0.05f * si/color.length)
             drawCircles(leftCX, topCY, r, s)
-            drawPlusses(leftCX, bottomCY, rowH, r, s)
-            drawCrosses(rightCX, topCY, rowH, r, s)
+            drawPlusses(leftCX, bottomCY, r, s)
+            drawCrosses(rightCX, topCY, r, s)
             drawSquares(rightCX, bottomCY, r, s)
 
           } else if (si == palette.length - 1) {
@@ -133,8 +129,8 @@ object TestCard extends App {
             // Coloured shapes on lightest shade middle row
             val darkShade = Color.decode(color(4))
             drawCircles(leftCX, cY, rad, defaultStroke, darkShade)
-            drawPlusses(leftCX, cY, rowH, rad, defaultStroke, darkShade)
-            drawCrosses(rightCX, cY, rowH, rad, defaultStroke, darkShade)
+            drawPlusses(leftCX, cY, rad, defaultStroke, darkShade)
+            drawCrosses(rightCX, cY, rad, defaultStroke, darkShade)
             drawSquares(rightCX, cY, rad, defaultStroke, darkShade)
 
           }
@@ -142,15 +138,12 @@ object TestCard extends App {
 
           // Concentric shapes in darkest shade at top/bottom
           drawCircles(leftCX, topCY, rad, defaultStroke, nested = true)
-          drawPlusses(leftCX, bottomCY, rowH, rad, defaultStroke, Color.WHITE, Color.decode(shade), nested = true)
-          drawCrosses(rightCX, topCY, rowH, rad, defaultStroke, Color.WHITE, Color.decode(shade), nested = true)
+          drawPlusses(leftCX, bottomCY, rad, defaultStroke, Color.WHITE, Color.decode(shade), nested = true)
+          drawCrosses(rightCX, topCY, rad, defaultStroke, Color.WHITE, Color.decode(shade), nested = true)
           drawSquares(rightCX, bottomCY, rad, defaultStroke, nested = true)
 
         }
-
-        rowOffset += rowH
       }
-      colOffset += paletteColW
     }
   }
 
@@ -196,14 +189,13 @@ object TestCard extends App {
     * Draw plusses centered on a point. Either a single plus or a nested cross pattern.
     * @param scX center X coord
     * @param scY center Y coord
-    * @param rowH height of the palette row
     * @param rad radius of the shape
     * @param stroke pen stroke width
     * @param color shape line color
     * @param background background color, used for cropping back nested plusses overdrawn for completeness
     * @param nested whether to draw nested shapes
     */
-  def drawPlusses(scX: Double, scY: Double, rowH: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, background: Color = Color.MAGENTA, nested: Boolean = false) {
+  def drawPlusses(scX: Double, scY: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, background: Color = Color.MAGENTA, nested: Boolean = false) {
     var radOffset = 0d
     val r = if (nested) 1.4d * rad else rad
     do {
@@ -223,11 +215,10 @@ object TestCard extends App {
         dLine(scX + radOffset, scY + radOffset, scX + radOffset, scY + r)
       }
       if (nested) {
-        val bound = Math.min(paletteColW, rowH)
-        val overlayStroke = bound * 0.15
+        val overlayStroke = grid * 0.15
         g.setColor(background)
         g.setStroke(new BasicStroke(overlayStroke.toFloat))
-        g.draw(new Rectangle2D.Double(scX - (bound * 0.375), scY - (bound * 0.375), bound * 0.75, bound * 0.75))
+        g.draw(new Rectangle2D.Double(scX - (grid * 0.375), scY - (grid * 0.375), grid * 0.75, grid * 0.75))
       }
       radOffset = radOffset + (stroke * 2)
     } while (radOffset < r && nested)
@@ -237,14 +228,13 @@ object TestCard extends App {
     * Draw crosses centered on a point. Either a single cross or a nested cross pattern.
     * @param scX center X coord
     * @param scY center Y coord
-    * @param rowH height of the palette row
     * @param rad radius of the shape
     * @param stroke pen stroke width
     * @param color shape line color
     * @param background background color, used for cropping back nested crosses overdrawn for completeness
     * @param nested whether to draw nested shapes
     */
-  def drawCrosses(scX: Double, scY: Double, rowH: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, background: Color = Color.MAGENTA, nested: Boolean = false) {
+  def drawCrosses(scX: Double, scY: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, background: Color = Color.MAGENTA, nested: Boolean = false) {
     var radOffset = 0d
     val r = if (nested) 1.3d * rad else rad
     do {
@@ -264,11 +254,10 @@ object TestCard extends App {
         dLine(scX, scY + radOffset, scX + r - radOffset, scY + r)
       }
       if (nested) {
-        val bound = Math.min(paletteColW, rowH)
-        val overlayStroke = bound * 0.15
+        val overlayStroke = grid * 0.15
         g.setColor(background)
         g.setStroke(new BasicStroke(overlayStroke.toFloat))
-        g.draw(new Rectangle2D.Double(scX - (bound * 0.375), scY - (bound * 0.375), bound * 0.75, bound * 0.75))
+        g.draw(new Rectangle2D.Double(scX - (grid * 0.375), scY - (grid * 0.375), grid * 0.75, grid * 0.75))
       }
       radOffset = radOffset + (stroke * 3)
     } while (radOffset < r && nested)
@@ -330,15 +319,13 @@ object TestCard extends App {
     * Black to white gradients at top and bottom.
     */
   def drawBlackWhiteGradients() {
-    val rowOffset = (imH * 0.1).toInt
-    val rowH = (imH - (2 * rowOffset)) / 19
     val paint = g.getPaint
-    g.setPaint(new GradientPaint(cX - (centerW/2), rowOffset, Color.BLACK, cX + (centerW/2), rowOffset, Color.WHITE))
-    g.fillRect(cX - (centerW/2), rowOffset, centerW, rowH)
-    g.fillRect(cX - (centerW/2), imH - rowOffset - rowH, centerW, rowH)
-    g.setPaint(new GradientPaint(cX - (centerW/2), rowOffset, Color.WHITE, cX + (centerW/2), rowOffset, Color.BLACK))
-    g.fillRect(cX - (centerW/2), rowOffset + (rowH/2), centerW, rowH - (rowH/2))
-    g.fillRect(cX - (centerW/2), imH - rowOffset - (rowH/2), centerW, rowH - (rowH/2))
+    g.setPaint(new GradientPaint(grid * 10, gridOffset, Color.BLACK, grid * 20, gridOffset, Color.WHITE))
+    g.fillRect(grid * 10, gridOffset, grid * 10, grid)
+    g.fillRect(grid * 10, imH - gridOffset - grid, grid * 10, grid)
+    g.setPaint(new GradientPaint(grid * 10, gridOffset, Color.WHITE, grid * 20, gridOffset, Color.BLACK))
+    g.fillRect(grid * 10, gridOffset + (grid/2), grid * 10, grid - (grid/2))
+    g.fillRect(grid * 10, imH - gridOffset - (grid/2), grid * 10, grid - (grid/2))
     g.setPaint(paint)
   }
 
