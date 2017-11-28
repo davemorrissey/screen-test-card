@@ -32,8 +32,8 @@ object TestCard extends App {
   g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
   g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
 
-  // Clear background
-  g.setColor(Color.WHITE)
+  // Clear background to dark grey
+  g.setColor(Color.decode("#424242"))
   g.fillRect(0, 0, imW, imH)
 
   // Draw test patterns
@@ -269,9 +269,29 @@ object TestCard extends App {
     * quadrants of the circle with radial lines.
     */
   def drawCentralCircles() {
+    // Perform a dry run to calculate the final radius
     var stroke = 0.5f
     var radius = 2f
     var multiplier = 1.2f
+    while ((radius < cX || radius < cY) && stroke >= 0.5f) {
+      if (radius > imW * 0.1) {
+        radius += (1 + (1/multiplier)) * stroke
+        stroke /= multiplier
+      } else {
+        radius += (1 + multiplier) * stroke
+        stroke *= multiplier
+      }
+    }
+    val outerRadius = (radius * 1.05).toInt
+
+    // Draw a white circle that provides a background and outline for the concentric circles
+    g.setColor(Color.WHITE)
+    g.fillOval(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2)
+
+    // Draw the concentric circles
+    stroke = 0.5f
+    radius = 2f
+    multiplier = 1.2f
     g.setColor(Color.BLACK)
     while ((radius < cX || radius < cY) && stroke >= 0.5f) {
       g.setStroke(new BasicStroke(stroke))
@@ -287,8 +307,8 @@ object TestCard extends App {
 
     // Black out the top right and bottom left
     g.setColor(Color.BLACK)
-    g.fillRect(cX, 0, cX, cY)
-    g.fillRect(0, cY, cX, cY)
+    g.fillArc(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2, 180, 90)
+    g.fillArc(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2, 0, 90)
 
     // Draw outer radial lines with 1 degree intervals
     g.setColor(Color.WHITE)
