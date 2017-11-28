@@ -37,6 +37,7 @@ object TestCard extends App {
   g.fillRect(0, 0, imW, imH)
 
   // Draw test patterns
+  drawGrid()
   drawCentralCircles()
   drawMaterialPalette()
   drawMaterialPaletteGraphics()
@@ -45,6 +46,20 @@ object TestCard extends App {
   g.dispose()
 
   ImageIO.write(canvas, "png", new java.io.File("testcard.png"))
+
+  /**
+    * Draws a grid of dotted lines over the grey background, in the central portion of the image.
+    */
+  def drawGrid() {
+    g.setColor(Color.decode("#9E9E9E"))
+    g.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, Array(1.0f, 4.0f), 0.5f))
+    for (x <- 11 to 19) {
+      g.draw(new Line2D.Double((x * grid) + 0.5d, gridOffset + grid, (x * grid) + 0.5d, imH - gridOffset - grid))
+    }
+    for (y <- 2 to 17) {
+      g.draw(new Line2D.Double(0, gridOffset + (y * grid) + 0.5d, imW, gridOffset + (y * grid) + 0.5d))
+    }
+  }
 
   /**
     * Renders a symmetrical palette grid at left and right of the image
