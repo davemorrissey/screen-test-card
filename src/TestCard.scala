@@ -19,8 +19,8 @@ object TestCard extends App {
     Array("#F3E5F5", "#E1BEE7", "#CE93D8", "#BA68C8", "#AB47BC", "#9C27B0", "#8E24AA", "#7B1FA2", "#6A1B9A", "#4A148C").reverse
   )
 
-  val imW = 600 // Preferably divisible by 30
-  val imH = 480 // About 0.75-0.8 of height
+  val imW = 720 // Preferably divisible by 30
+  val imH = 580 // About 0.75-0.8 of height
   val cX = imW/2
   val cY = imH/2
   val grid = imW/30
