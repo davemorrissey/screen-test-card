@@ -42,6 +42,7 @@ object TestCard extends App {
   drawMaterialPalette()
   drawMaterialPaletteGraphics()
   drawBlackWhiteGradients()
+  drawLetters()
 
   g.dispose()
 
@@ -70,7 +71,7 @@ object TestCard extends App {
     for ((color, ci) <- palette.zipWithIndex) {
 
       // At left and right, fill the whole column with a middle shade of the color
-      g.setColor(Color.decode(color(4)))
+      g.setColor(Color.decode(color(1)))
       g.fillRect(ci * grid, 0, grid, imH) // Left
       g.fillRect(imW - (ci * grid) - grid, 0, grid, imH) // Right
 
@@ -276,6 +277,47 @@ object TestCard extends App {
       }
       radOffset = radOffset + (stroke * 3)
     } while (radOffset < r && nested)
+  }
+
+  /**
+    * Draws letters and numbers of varying size in the top and bottom of each material
+    * palette column.
+    */
+  def drawLetters() {
+    val minSize = 10
+    val maxSize = (imH * 0.04).toInt
+    val increment = (maxSize - minSize)/(palette.length - 1)
+    val stringTop = "ABCDEFGHIJ"
+    val stringBottom = "0123456789"
+
+    val tCY = gridOffset * 0.5f
+    var tCX = grid/2f
+    for ((color, ci) <- palette.zipWithIndex) {
+      g.setColor(Color.WHITE)
+      g.setFont(new Font("Roboto Slab", Font.PLAIN, minSize + ((palette.length - ci - 1) * increment)))
+
+      val letterL = stringTop.substring(ci, ci + 1)
+      val widthL = g.getFontMetrics.getStringBounds(letterL, canvas.getGraphics).getWidth
+      val ascentL = g.getFontMetrics.getLineMetrics(letterL, canvas.getGraphics).getAscent
+      g.drawString(letterL, (tCX - (widthL / 2)).toFloat, (tCY + (ascentL * 0.35)).toFloat)
+
+      val letterR = stringTop.reverse.substring(ci, ci + 1)
+      val widthR = g.getFontMetrics.getStringBounds(letterR, canvas.getGraphics).getWidth
+      val ascentR = g.getFontMetrics.getLineMetrics(letterR, canvas.getGraphics).getAscent
+      g.drawString(letterR, (imW - tCX - (widthR / 2)).toFloat, (tCY + (ascentR * 0.35)).toFloat)
+
+      val letterBL = stringBottom.substring(ci, ci + 1)
+      val widthBL = g.getFontMetrics.getStringBounds(letterBL, canvas.getGraphics).getWidth
+      val ascentBL = g.getFontMetrics.getLineMetrics(letterBL, canvas.getGraphics).getAscent
+      g.drawString(letterBL, (tCX - (widthBL / 2)).toFloat, (imH - tCY + (ascentBL * 0.35)).toFloat)
+
+      val letterBR = stringBottom.reverse.substring(ci, ci + 1)
+      val widthBR = g.getFontMetrics.getStringBounds(letterBR, canvas.getGraphics).getWidth
+      val ascentBR = g.getFontMetrics.getLineMetrics(letterBR, canvas.getGraphics).getAscent
+      g.drawString(letterBR, (imW - tCX - (widthBR / 2)).toFloat, (imH - tCY + (ascentBR * 0.35)).toFloat)
+
+      tCX += grid
+    }
   }
 
   /**
