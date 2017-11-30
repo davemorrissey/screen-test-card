@@ -41,7 +41,7 @@ object TestCard extends App {
   drawCentralCircles()
   drawMaterialPalette()
   drawMaterialPaletteGraphics()
-  drawBlackWhiteGradients()
+  drawGreyShapes()
   drawLetters()
 
   g.dispose()
@@ -393,17 +393,29 @@ object TestCard extends App {
   }
 
   /**
-    * Black to white gradients at top and bottom.
+    * Draw the first row of the grid top and bottom with shapes of varying stroke width,
+    * and add hairline borders.
     */
-  def drawBlackWhiteGradients() {
-    val paint = g.getPaint
-    g.setPaint(new GradientPaint(grid * 10, gridOffset, Color.BLACK, grid * 20, gridOffset, Color.WHITE))
+  def drawGreyShapes() {
+    g.setColor(Color.decode("#313131"))
     g.fillRect(grid * 10, gridOffset, grid * 10, grid)
     g.fillRect(grid * 10, imH - gridOffset - grid, grid * 10, grid)
-    g.setPaint(new GradientPaint(grid * 10, gridOffset, Color.WHITE, grid * 20, gridOffset, Color.BLACK))
-    g.fillRect(grid * 10, gridOffset + (grid/2), grid * 10, grid - (grid/2))
-    g.fillRect(grid * 10, imH - gridOffset - (grid/2), grid * 10, grid - (grid/2))
-    g.setPaint(paint)
+
+    val rad = (grid * 0.3).toInt
+    for (i <- 0 to 4) {
+      val stroke = Math.max(1, grid * (0.05f - (i * 0.01f)))
+      drawCircles(grid * (10.5d + i), gridOffset + (grid * 0.5d), rad, stroke)
+      drawCrosses(imW - (grid * (10.5d + i)), gridOffset + (grid * 0.5d), rad, stroke)
+      drawPlusses(grid * (10.5d + i), imH - gridOffset - (grid * 0.5d), rad, stroke)
+      drawSquares(imW - (grid * (10.5d + i)), imH - gridOffset - (grid * 0.5d), rad, stroke)
+    }
+
+    val lineW = 1
+    g.setColor(Color.WHITE)
+    g.fillRect(0, gridOffset, imW, lineW)
+    g.fillRect(grid * 10, gridOffset + grid - lineW, grid * 10, lineW)
+    g.fillRect(grid * 10, imH - gridOffset - grid, grid * 10, lineW)
+    g.fillRect(0, imH - gridOffset - lineW, imW, lineW)
   }
 
   def dLine(x1: Double, y1: Double, x2: Double, y2: Double) {
