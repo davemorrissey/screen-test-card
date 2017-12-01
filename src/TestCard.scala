@@ -2,6 +2,7 @@ import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import java.awt.geom._
 import java.awt._
+import java.io.File
 
 object TestCard extends App {
 
@@ -37,6 +38,8 @@ object TestCard extends App {
   g.fillRect(0, 0, imW, imH)
 
   // Draw test patterns
+  drawHeader()
+  drawFooter()
   drawGrid()
   drawCentralCircles()
   drawMaterialPalette()
@@ -60,6 +63,32 @@ object TestCard extends App {
     for (y <- 2 to 17) {
       g.draw(new Line2D.Double(0, gridOffset + (y * grid) + 0.5d, imW, gridOffset + (y * grid) + 0.5d))
     }
+  }
+
+  /**
+    * Draws the SSIV icon centered in the header area.
+    */
+  def drawHeader() {
+    val image = ImageIO.read(new File("icon.png"))
+    val radius = (gridOffset/2.5).toInt
+    g.drawImage(image, cX - radius, (gridOffset/2) - radius, 2 * radius, 2 * radius, Color.decode("#424242"), null)
+  }
+
+  /**
+    * Draws github link and image dimensions in the footer area.
+    */
+  def drawFooter() {
+    val link = "github.com/davemorrissey/screen-test-card"
+    val size = imW + " x " + imH
+    g.setColor(Color.decode("#9E9E9E"))
+    g.setFont(new Font("Roboto Slab", Font.PLAIN, Math.max(8, (imW * 0.0075).toInt)))
+
+    val linkWidth = g.getFontMetrics.getStringBounds(link, canvas.getGraphics).getWidth
+    val sizeWidth = g.getFontMetrics.getStringBounds(size, canvas.getGraphics).getWidth
+    val ascent = g.getFontMetrics.getLineMetrics(link, canvas.getGraphics).getAscent
+
+    g.drawString(link, (cX - (linkWidth/2f)).toFloat, imH - (gridOffset/2f) - (ascent * 0.6).toInt)
+    g.drawString(size, (cX - (sizeWidth/2f)).toFloat, imH - (gridOffset/2f) + (ascent * 0.9).toInt)
   }
 
   /**
