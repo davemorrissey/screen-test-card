@@ -20,8 +20,8 @@ object TestCard extends App {
     Array("#F3E5F5", "#E1BEE7", "#CE93D8", "#BA68C8", "#AB47BC", "#9C27B0", "#8E24AA", "#7B1FA2", "#6A1B9A", "#4A148C").reverse
   )
 
-  val imW = 720 // Preferably divisible by 30
-  val imH = 580 // About 0.75-0.8 of height
+  val imW = 600 // Preferably divisible by 30
+  val imH = 480 // About 0.75-0.8 of height
   val cX = imW/2
   val cY = imH/2
   val grid = imW/30
@@ -145,10 +145,10 @@ object TestCard extends App {
         val rowY = gridOffset + (si * grid)
         val colX = ci * grid
 
-        val leftCX = colX + (grid/2d)
-        val rightCX = imW - colX - (grid/2)
-        val topCY = rowY + (grid/2d)
-        val bottomCY = imH - rowY - (grid/2)
+        val leftCX = colX + (grid/2d) - 0.5
+        val rightCX = imW - colX - (grid/2) - 0.5
+        val topCY = rowY + (grid/2d) - 0.5
+        val bottomCY = imH - rowY - (grid/2) - 0.5
 
         if (si > 0) {
           if (ci < palette.length - 1 && si < palette.length - 1 && ci == si) {
@@ -435,10 +435,10 @@ object TestCard extends App {
     val rad = (grid * 0.3).toInt
     for (i <- 0 to 4) {
       val stroke = Math.max(1, grid * (0.05f - (i * 0.01f)))
-      drawCircles(grid * (10.5d + i), gridOffset + (grid * 0.5d), rad, stroke)
-      drawCrosses(imW - (grid * (10.5d + i)), gridOffset + (grid * 0.5d), rad, stroke)
-      drawPlusses(grid * (10.5d + i), imH - gridOffset - (grid * 0.5d), rad, stroke)
-      drawSquares(imW - (grid * (10.5d + i)), imH - gridOffset - (grid * 0.5d), rad, stroke)
+      drawCircles(grid * (10.5d + i) - 0.5, gridOffset + (grid * 0.5d) - 0.5, rad, stroke)
+      drawCrosses(imW - (grid * (10.5d + i)) - 0.5, gridOffset + (grid * 0.5d) - 0.5, rad, stroke)
+      drawPlusses(grid * (10.5d + i) - 0.5, imH - gridOffset - (grid * 0.5d) - 0.5, rad, stroke)
+      drawSquares(imW - (grid * (10.5d + i)) - 0.5, imH - gridOffset - (grid * 0.5d) - 0.5, rad, stroke)
     }
 
     val lineW = 1
