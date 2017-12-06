@@ -175,7 +175,7 @@ object TestCard extends App {
             val darkShade = Color.decode(color(4))
             drawCircles(leftCX, cY, rad, defaultStroke, darkShade)
             drawPlusses(leftCX, cY, rad, defaultStroke, darkShade)
-            drawCrosses(rightCX, cY, rad, defaultStroke, darkShade)
+            drawCrosses(rightCX, cY, rad, defaultStroke, darkShade, inside = true)
             drawSquares(rightCX, cY, rad, defaultStroke, darkShade)
 
           }
@@ -183,8 +183,8 @@ object TestCard extends App {
 
           // Concentric shapes in darkest shade at top/bottom
           drawCircles(leftCX, topCY, rad, defaultStroke, nested = true)
-          drawPlusses(leftCX, bottomCY, rad, defaultStroke, Color.WHITE, Color.decode(shade), nested = true)
-          drawCrosses(rightCX, topCY, rad, defaultStroke, Color.WHITE, Color.decode(shade), nested = true)
+          drawPlusses(leftCX, bottomCY, rad, defaultStroke, Color.WHITE, nested = true)
+          drawCrosses(rightCX, topCY, rad, defaultStroke, Color.WHITE, inside = false, nested = true)
           drawSquares(rightCX, bottomCY, rad, defaultStroke, nested = true)
 
         }
@@ -237,12 +237,12 @@ object TestCard extends App {
     * @param rad radius of the shape
     * @param stroke pen stroke width
     * @param color shape line color
-    * @param background background color, used for cropping back nested plusses overdrawn for completeness
     * @param nested whether to draw nested shapes
     */
-  def drawPlusses(scX: Double, scY: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, background: Color = Color.MAGENTA, nested: Boolean = false) {
+  def drawPlusses(scX: Double, scY: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, nested: Boolean = false) {
     var radOffset = 0d
     val r = if (nested) 1.4d * rad else rad
+    val background = new Color(canvas.getRGB(scX.toInt, scY.toInt))
     do {
       g.setColor(color)
       g.setStroke(new BasicStroke(stroke))
@@ -259,14 +259,14 @@ object TestCard extends App {
         dLine(scX + r, scY + radOffset, scX + radOffset, scY + radOffset)
         dLine(scX + radOffset, scY + radOffset, scX + radOffset, scY + r)
       }
-      if (nested) {
-        val overlayStroke = grid * 0.15
-        g.setColor(background)
-        g.setStroke(new BasicStroke(overlayStroke.toFloat))
-        g.draw(new Rectangle2D.Double(scX - (grid * 0.375), scY - (grid * 0.375), grid * 0.75, grid * 0.75))
-      }
       radOffset = radOffset + (stroke * 2)
     } while (radOffset < r && nested)
+    if (nested) {
+      val overlayStroke = grid * 0.15
+      g.setColor(background)
+      g.setStroke(new BasicStroke(overlayStroke.toFloat))
+      g.draw(new Rectangle2D.Double(scX - (grid * 0.375), scY - (grid * 0.375), grid * 0.75, grid * 0.75))
+    }
   }
 
   /**
@@ -276,18 +276,22 @@ object TestCard extends App {
     * @param rad radius of the shape
     * @param stroke pen stroke width
     * @param color shape line color
-    * @param background background color, used for cropping back nested crosses overdrawn for completeness
+    * @param inside if this cross is being drawn inside a square
     * @param nested whether to draw nested shapes
     */
-  def drawCrosses(scX: Double, scY: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, background: Color = Color.MAGENTA, nested: Boolean = false) {
+  def drawCrosses(scX: Double, scY: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, inside: Boolean = false, nested: Boolean = false) {
     var radOffset = 0d
     val r = if (nested) 1.3d * rad else rad
+    val background = new Color(canvas.getRGB(scX.toInt, scY.toInt))
     do {
       g.setColor(color)
-      g.setStroke(new BasicStroke(stroke))
-      if (radOffset == 0d) {
+      g.setStroke(new BasicStroke(stroke, if (inside) BasicStroke.CAP_ROUND else BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f))
+      if (radOffset == 0d && !inside) {
         dLine(scX - r, scY - r, scX + r, scY + r)
         dLine(scX - r, scY + r, scX + r, scY - r)
+      } else if (radOffset == 0d) {
+        dLine(scX - r + (stroke/2), scY - r + (stroke/2), scX + r - (stroke/2), scY + r - (stroke/2))
+        dLine(scX - r + (stroke/2), scY + r - (stroke/2), scX + r - (stroke/2), scY - r + (stroke/2))
       } else {
         dLine(scX - r + radOffset, scY - r, scX, scY - radOffset)
         dLine(scX, scY - radOffset, scX + r - radOffset, scY - r)
@@ -298,14 +302,12 @@ object TestCard extends App {
         dLine(scX - r + radOffset, scY + r, scX, scY + radOffset)
         dLine(scX, scY + radOffset, scX + r - radOffset, scY + r)
       }
-      if (nested) {
-        val overlayStroke = grid * 0.15
-        g.setColor(background)
-        g.setStroke(new BasicStroke(overlayStroke.toFloat))
-        g.draw(new Rectangle2D.Double(scX - (grid * 0.375), scY - (grid * 0.375), grid * 0.75, grid * 0.75))
-      }
       radOffset = radOffset + (stroke * 3)
     } while (radOffset < r && nested)
+    val overlayStroke = rad * 0.5
+    g.setColor(background)
+    g.setStroke(new BasicStroke(overlayStroke.toFloat))
+    g.draw(new Rectangle2D.Double(scX - (rad * 1.25), scY - (rad * 1.25), rad * 2.5, rad * 2.5))
   }
 
   /**
