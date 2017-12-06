@@ -372,9 +372,13 @@ object TestCard extends App {
     }
     val outerRadius = (radius * 1.05).toInt
 
-    // Draw a white circle that provides a background and outline for the concentric circles
+    // Draw quadrants of black and white to provide background for circles and outline for the pattern
     g.setColor(Color.WHITE)
-    g.fillOval(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2)
+    g.fillArc(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2, 90, 90)
+    g.fillArc(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2, 270, 90)
+    g.setColor(Color.BLACK)
+    g.fillArc(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2, 0, 90)
+    g.fillArc(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2, 180, 90)
 
     // Draw the concentric circles
     stroke = 0.5f
@@ -393,32 +397,29 @@ object TestCard extends App {
       }
     }
 
-    // Black out the top right and bottom left
-    g.setColor(Color.BLACK)
-    g.fillArc(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2, 180, 90)
-    g.fillArc(cX - outerRadius, cY - outerRadius, outerRadius * 2, outerRadius * 2, 0, 90)
+    radius = Math.ceil(radius).toFloat
+    if (radius % 2 != 0) {
+      radius += 1
+    }
 
     // Draw outer radial lines with 1 degree intervals
-    g.setColor(Color.WHITE)
-    for (i <- 180 to 268 by 2) {
+    for (i <- 180 to 269 by 1) {
+      g.setColor(if (i % 2 == 0) Color.WHITE else Color.BLACK)
       g.fillArc(cX - radius.toInt, cY - radius.toInt, radius.toInt * 2, radius.toInt * 2, i, 1)
     }
-    for (i <- 0 to 88 by 2) {
+    for (i <- 0 to 89 by 1) {
+      g.setColor(if (i % 2 == 0) Color.BLACK else Color.WHITE)
       g.fillArc(cX - radius.toInt, cY - radius.toInt, radius.toInt * 2, radius.toInt * 2, i, 1)
     }
-
-    // Overlay the central part of the two radial segments
-    g.setColor(Color.BLACK)
-    g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, 180, 90)
-    g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, 0, 90)
 
     // Draw inner radial lines with 2 degree intervals
-    g.setColor(Color.WHITE)
-    for (i <- 180 to 268 by 4) {
-      g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, i, 2)
+    for (i <- 180 to 268 by 2) {
+      g.setColor(if (i % 4 == 0) Color.WHITE else Color.BLACK)
+      g.fillArc(cX - (radius/2).toInt, cY - (radius/2).toInt, radius.toInt, radius.toInt, i, 2)
     }
-    for (i <- 0 to 88 by 4) {
-      g.fillArc(cX - (radius.toInt/2), cY - (radius.toInt/2), radius.toInt, radius.toInt, i, 2)
+    for (i <- 0 to 88 by 2) {
+      g.setColor(if (i % 4 == 0) Color.BLACK else Color.WHITE)
+      g.fillArc(cX - (radius/2).toInt, cY - (radius/2).toInt, radius.toInt, radius.toInt, i, 2)
     }
 
   }
