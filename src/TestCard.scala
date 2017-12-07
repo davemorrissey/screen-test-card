@@ -20,8 +20,10 @@ object TestCard extends App {
     Array("#F3E5F5", "#E1BEE7", "#CE93D8", "#BA68C8", "#AB47BC", "#9C27B0", "#8E24AA", "#7B1FA2", "#6A1B9A", "#4A148C").reverse
   )
 
-  val imW = 600 // Preferably divisible by 30
-  val imH = 480 // About 0.75-0.8 of height
+  val imW = 1200 // Preferably divisible by 30
+  val imH = 960 // About 0.75-0.8 of height
+  val prW = 600
+  val prH = 480
   val cX = imW/2
   val cY = imH/2
   val grid = imW/30
@@ -49,7 +51,12 @@ object TestCard extends App {
 
   g.dispose()
 
-  ImageIO.write(canvas, "png", new java.io.File("testcard.png"))
+  ImageIO.write(canvas, "png", new File("card.png"))
+
+  val preview = new BufferedImage(prW, prH, BufferedImage.TYPE_INT_RGB)
+  preview.getGraphics.drawImage(canvas.getScaledInstance(prW, prH, Image.SCALE_SMOOTH), 0, 0, null)
+  ImageIO.write(preview, "png", new File("preview.png"))
+
 
   /**
     * Draws a grid of dotted lines over the grey background, in the central portion of the image.
