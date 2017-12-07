@@ -142,10 +142,11 @@ object TestCard extends App {
     */
   def drawMaterialPaletteGraphics() {
 
+    val maxStroke = Math.round(Math.max(1f, grid * 0.05f))
     for ((color, ci) <- palette.zipWithIndex) {
 
       val rad = (grid * 0.3).toInt
-      val defaultStroke = Math.max(1, grid * (0.05f * (ci+1)/palette.length))
+      val defaultStroke = Math.min(maxStroke, ci + 1)
       for ((shade, si) <- color.zipWithIndex) {
         g.setColor(Color.WHITE)
 
@@ -169,8 +170,8 @@ object TestCard extends App {
           } else if (ci == palette.length - 1 && si < palette.length - 1) {
 
             // Decreasing size shapes in last (middle) color column
-            val r = grid * 0.3 * ((si + 2f)/color.length)
-            val s = grid * (0.05f * si/color.length)
+            val r = Math.round(grid * 0.3 * ((si + 2f)/color.length))
+            val s = Math.min(defaultStroke, si)
             drawCircles(leftCX, topCY, r, s)
             drawPlusses(leftCX, bottomCY, r, s)
             drawCrosses(rightCX, topCY, r, s)
@@ -440,9 +441,11 @@ object TestCard extends App {
     g.fillRect(grid * 10, gridOffset, grid * 10, grid)
     g.fillRect(grid * 10, imH - gridOffset - grid, grid * 10, grid)
 
+    val maxStroke = Math.round(Math.max(1f, grid * 0.05f))
+    val strokeStep = if (maxStroke >= 9) 2 else 1
     val rad = (grid * 0.3).toInt
     for (i <- 0 to 4) {
-      val stroke = Math.max(1, grid * (0.05f - (i * 0.01f)))
+      val stroke = Math.min(maxStroke, 1 + ((4 - i) * strokeStep))
       drawCircles(grid * (10.5d + i) - 0.5, gridOffset + (grid * 0.5d) - 0.5, rad, stroke)
       drawCrosses(imW - (grid * (10.5d + i)) - 0.5, gridOffset + (grid * 0.5d) - 0.5, rad, stroke)
       drawPlusses(grid * (10.5d + i) - 0.5, imH - gridOffset - (grid * 0.5d) - 0.5, rad, stroke)
