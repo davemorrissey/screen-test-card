@@ -1,3 +1,4 @@
+import java.awt.BasicStroke.{CAP_BUTT, JOIN_MITER}
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import java.awt.geom._
@@ -153,10 +154,10 @@ object TestCard extends App {
         val rowY = gridOffset + (si * grid)
         val colX = ci * grid
 
-        val leftCX = colX + (grid/2d) - 0.5
-        val rightCX = imW - colX - (grid/2) - 0.5
-        val topCY = rowY + (grid/2d) - 0.5
-        val bottomCY = imH - rowY - (grid/2) - 0.5
+        val leftCX = colX + (grid/2d)
+        val rightCX = imW - colX - (grid/2)
+        val topCY = rowY + (grid/2d)
+        val bottomCY = imH - rowY - (grid/2)
 
         if (si > 0) {
           if (ci < palette.length - 1 && si < palette.length - 1 && ci == si) {
@@ -213,10 +214,11 @@ object TestCard extends App {
     g.setStroke(new BasicStroke(stroke))
     g.setColor(color)
     var radOffset = 0d
+    val nudge = if (stroke % 2 == 1) -0.5d else 0d
     do {
-      g.draw(new Ellipse2D.Double(scX - rad + radOffset, scY - rad + radOffset, (rad - radOffset) * 2, (rad - radOffset) * 2))
+      g.draw(new Ellipse2D.Double(scX - rad + radOffset + nudge, scY - rad + radOffset + nudge, (rad - radOffset) * 2, (rad - radOffset) * 2))
       radOffset = radOffset + (stroke * 2)
-    } while (radOffset < rad && nested)
+    } while (radOffset < rad && (rad - radOffset > stroke) && nested)
   }
 
   /**
@@ -231,7 +233,7 @@ object TestCard extends App {
   def drawSquares(scX: Double, scY: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, nested: Boolean = false) {
     g.setStroke(new BasicStroke(stroke))
     g.setColor(color)
-    var radOffset = 0d
+    var radOffset = if (stroke % 2 == 1) -0.5d else 0d
     do {
       g.draw(new Rectangle2D.Double(scX - rad + radOffset, scY - rad + radOffset, (rad - radOffset) * 2, (rad - radOffset) * 2))
       radOffset = radOffset + (stroke * 2)
@@ -249,31 +251,38 @@ object TestCard extends App {
     */
   def drawPlusses(scX: Double, scY: Double, rad: Double, stroke: Float, color: Color = Color.WHITE, nested: Boolean = false) {
     var radOffset = 0d
-    val r = if (nested) 1.4d * rad else rad
+    val nudge = if (stroke % 2 == 1) -0.5d else 0d
+    val r = if (nested) 1.3d * rad else rad
     val background = new Color(canvas.getRGB(scX.toInt, scY.toInt))
     do {
       g.setColor(color)
-      g.setStroke(new BasicStroke(stroke))
       if (radOffset == 0d) {
-        dLine(scX, scY - r, scX, scY + r)
-        dLine(scX - r, scY, scX + r, scY)
+        g.setStroke(new BasicStroke(stroke, CAP_BUTT, JOIN_MITER, 10.0f, null, 0.0f))
+        dLine(scX + nudge, scY - r, scX + nudge, scY + r)
+        dLine(scX - r, scY + nudge, scX + r, scY + nudge)
       } else {
-        dLine(scX - radOffset, scY - r, scX - radOffset, scY - radOffset)
-        dLine(scX - radOffset, scY - radOffset, scX - r, scY - radOffset)
-        dLine(scX + radOffset, scY - r, scX + radOffset, scY - radOffset)
-        dLine(scX + radOffset, scY - radOffset, scX + r, scY - radOffset)
-        dLine(scX - r, scY + radOffset, scX - radOffset, scY + radOffset)
-        dLine(scX - radOffset, scY + radOffset, scX - radOffset, scY + r)
-        dLine(scX + r, scY + radOffset, scX + radOffset, scY + radOffset)
-        dLine(scX + radOffset, scY + radOffset, scX + radOffset, scY + r)
+        g.setStroke(new BasicStroke(stroke))
+        dLine(scX - radOffset + nudge, scY - r + nudge, scX - radOffset + nudge, scY - radOffset + nudge)
+        dLine(scX - radOffset + nudge, scY - radOffset + nudge, scX - r + nudge, scY - radOffset + nudge)
+        dLine(scX + radOffset + nudge, scY - r + nudge, scX + radOffset + nudge, scY - radOffset + nudge)
+        dLine(scX + radOffset + nudge, scY - radOffset + nudge, scX + r + nudge, scY - radOffset + nudge)
+        dLine(scX - r + nudge, scY + radOffset + nudge, scX - radOffset + nudge, scY + radOffset + nudge)
+        dLine(scX - radOffset + nudge, scY + radOffset + nudge, scX - radOffset + nudge, scY + r + nudge)
+        dLine(scX + r + nudge, scY + radOffset + nudge, scX + radOffset + nudge, scY + radOffset + nudge)
+        dLine(scX + radOffset + nudge, scY + radOffset + nudge, scX + radOffset + nudge, scY + r + nudge)
       }
       radOffset = radOffset + (stroke * 2)
     } while (radOffset < r && nested)
     if (nested) {
       val overlayStroke = grid * 0.15
       g.setColor(background)
-      g.setStroke(new BasicStroke(overlayStroke.toFloat))
-      g.draw(new Rectangle2D.Double(scX - (grid * 0.375), scY - (grid * 0.375), grid * 0.75, grid * 0.75))
+      g.setStroke(new BasicStroke(overlayStroke.toInt))
+      val olN = if (overlayStroke.toInt % 2 == 1) -0.5d else 0d
+      val olRN = if (stroke % 2 == 1 && olN == 0) -1d else 0d
+      val olX = scX - (grid * 0.75).toInt/2 + olN
+      val olY = scY - (grid * 0.75).toInt/2 + olN
+      val olR = (grid * 0.75).toInt + olRN
+      g.draw(new Rectangle2D.Double(olX, olY, olR, olR))
     }
   }
 
@@ -446,10 +455,10 @@ object TestCard extends App {
     val rad = (grid * 0.3).toInt
     for (i <- 0 to 4) {
       val stroke = Math.min(maxStroke, 1 + ((4 - i) * strokeStep))
-      drawCircles(grid * (10.5d + i) - 0.5, gridOffset + (grid * 0.5d) - 0.5, rad, stroke)
-      drawCrosses(imW - (grid * (10.5d + i)) - 0.5, gridOffset + (grid * 0.5d) - 0.5, rad, stroke)
-      drawPlusses(grid * (10.5d + i) - 0.5, imH - gridOffset - (grid * 0.5d) - 0.5, rad, stroke)
-      drawSquares(imW - (grid * (10.5d + i)) - 0.5, imH - gridOffset - (grid * 0.5d) - 0.5, rad, stroke)
+      drawCircles(grid * (10.5d + i), gridOffset + (grid * 0.5d), rad, stroke)
+      drawCrosses(imW - (grid * (10.5d + i)), gridOffset + (grid * 0.5d), rad, stroke)
+      drawPlusses(grid * (10.5d + i), imH - gridOffset - (grid * 0.5d), rad, stroke)
+      drawSquares(imW - (grid * (10.5d + i)), imH - gridOffset - (grid * 0.5d), rad, stroke)
     }
 
     val lineW = 1
